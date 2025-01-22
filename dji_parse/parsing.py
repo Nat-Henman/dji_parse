@@ -24,12 +24,12 @@ class Metadata:
 class Position:
     time: str
     timestamp: str
-    latitude: float
-    longitude: float
-    rel_elevation: float
-    distance: float
-    horizontal_velocity: float
-    vertical_velocity: float
+    latitude: float | None
+    longitude: float | None
+    rel_elevation: float | None
+    distance: float | None
+    horizontal_velocity: float | None
+    vertical_velocity: float | None
 
 
 def parse_metadata_from_probe(probe_result: dict) -> Metadata:
@@ -54,18 +54,19 @@ def timestamp(ts: SubRipTime) -> timedelta:
 
 
 def position_from_subtitle(start_time: datetime, message: SubRipItem) -> Position:
-    parsed = re.findall(TELEMETRY_PARSE_RE, message.text)[0]
+    parsed = re.findall(TELEMETRY_PARSE_RE, message.text)
+    parsed = parsed[0] if parsed else [None] * 6
 
     ts = timestamp(message.start)
     return Position(
         time=(start_time + ts).isoformat(),
         timestamp="{:0>8}".format(str(ts)),
-        latitude=float(parsed[1]),
-        longitude=float(parsed[0]),
-        distance=float(parsed[2]),
-        rel_elevation=float(parsed[3]),
-        horizontal_velocity=float(parsed[4]),
-        vertical_velocity=float(parsed[5]),
+        latitude=float(parsed[1]) if parsed[1] else None,
+        longitude=float(parsed[0]) if parsed[0] else None,
+        distance=float(parsed[2]) if parsed[2] else None,
+        rel_elevation=float(parsed[3]) if parsed[3] else None,
+        horizontal_velocity=float(parsed[4]) if parsed[4] else None,
+        vertical_velocity=float(parsed[5]) if parsed[5] else None,
     )
 
 
